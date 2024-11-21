@@ -8,8 +8,9 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+// Set up the PostgreSQL connection using the Neon database connection string
 const pool = new Pool({
-  connectionString: process.env.POSTGRES_URL,
+  connectionString: 'postgresql://mytask_owner:xNoh4FnXW1mv@ep-round-paper-a547zri7.us-east-2.aws.neon.tech/mytask?sslmode=require',
   ssl: {
     rejectUnauthorized: false
   }
