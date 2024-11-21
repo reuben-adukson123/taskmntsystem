@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ email, password })
             });
             const data = await response.json();
-            if (data.userId) {
+            if (data.message) {
                 showError('Registration successful. Please log in.');
             } else {
                 showError(data.error);
@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     searchBtn.addEventListener('click', async () => {
-        const query = document.getElementById('search-input').value;
+        const query = document.getElementById('search-query').value;
         try {
             const response = await fetch(`${API_URL}/tasks/search?query=${query}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -160,36 +160,6 @@ document.addEventListener('DOMContentLoaded', () => {
             showError('Error filtering tasks');
         }
     });
-
-    window.updateTaskPriority = async (id, currentPriority) => {
-        const newPriority = currentPriority === 'low' ? 'medium' : currentPriority === 'medium' ? 'high' : 'low';
-        try {
-            const response = await fetch(`${API_URL}/tasks/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ priority: newPriority })
-            });
-            await response.json();
-            fetchTasks();
-        } catch (error) {
-            showError('Error updating task priority');
-        }
-    };
-
-    window.deleteTask = async (id) => {
-        try {
-            await fetch(`${API_URL}/tasks/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            fetchTasks();
-        } catch (error) {
-            showError('Error deleting task');
-        }
-    };
 
     if (token) {
         showTaskContainer();
