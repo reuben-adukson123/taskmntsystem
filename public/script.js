@@ -161,6 +161,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    window.updateTaskPriority = async (id, currentPriority) => {
+        const newPriority = currentPriority === 'low' ? 'medium' : currentPriority === 'medium' ? 'high' : 'low';
+        try {
+            const response = await fetch(`${API_URL}/tasks/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ priority: newPriority })
+            });
+            await response.json();
+            fetchTasks();
+        } catch (error) {
+            showError('Error updating task priority');
+        }
+    };
+
+    window.deleteTask = async (id) => {
+        try {
+            await fetch(`${API_URL}/tasks/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            fetchTasks();
+        } catch (error) {
+            showError('Error deleting task');
+        }
+    };
+
     if (token) {
         showTaskContainer();
     } else {
