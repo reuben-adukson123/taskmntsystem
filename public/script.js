@@ -1,199 +1,272 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const API_URL = '/api';
-    let token = localStorage.getItem('token');
+// DOM elements 
+const loginForm = document.getElementById('login-form');
+const registerForm = document.getElementById('register-form');
+const taskContainer = document.getElementById('task-container');
+const authContainer = document.getElementById('auth-container');
+const createTaskForm = document.getElementById('create-task-form');
+const logoutBtn = document.getElementById('logout-btn');
+const errorContainer = document.getElementById('error-container');
+const tasksList = document.getElementById('tasks-list');
+const searchBtn = document.getElementById('search-btn');
+const filterBtn = document.getElementById('filter-btn');
 
-    const authContainer = document.getElementById('auth-container');
-    const taskContainer = document.getElementById('task-container');
-    const errorContainer = document.getElementById('error-container');
-    const loginForm = document.getElementById('login-form');
-    const registerForm = document.getElementById('register-form');
-    const logoutBtn = document.getElementById('logout-btn');
-    const createTaskForm = document.getElementById('create-task-form');
-    const tasksList = document.getElementById('tasks-list');
-    const searchBtn = document.getElementById('search-btn');
-    const filterBtn = document.getElementById('filter-btn');
+// Global token
+let token = localStorage.getItem('token');
 
-    function showError(message) {
-        errorContainer.textContent = message;
-    }
+// Function to display error messages
+function showError(message) {
+    errorContainer.textContent = message;
+}
 
-    function clearError() {
-        errorContainer.textContent = '';
-    }
+// Function to clear error messages
+function clearError() {
+    errorContainer.textContent = '';
+}
 
-    function showAuthContainer() {
-        authContainer.style.display = 'block';
-        taskContainer.style.display = 'none';
-    }
+// Function to show authentication container (login/register)
+function showAuthContainer() {
+    authContainer.style.display = 'block';
+    taskContainer.style.display = 'none';
+}
 
-    function showTaskContainer() {
-        authContainer.style.display = 'none';
-        taskContainer.style.display = 'block';
-        fetchTasks();
-    }
+// Function to show task container
+function showTaskContainer() {
+    authContainer.style.display = 'none';
+    taskContainer.style.display = 'block';
+    fetchTasks();
+}
 
-    async function fetchTasks() {
-        try {
-            const response = await fetch(`${API_URL}/tasks`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const tasks = await response.json();
-            renderTasks(tasks);
-        } catch (error) {
-            showError('Error fetching tasks');
-        }
-    }
+// Handle login
+loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearError();
 
-    function renderTasks(tasks) {
-        tasksList.innerHTML = '';
-        tasks.forEach(task => {
-            const taskElement = document.createElement('div');
-            taskElement.className = 'task';
-            taskElement.innerHTML = `
-                <h3>${task.title}</h3>
-                <p>${task.description}</p>
-                <p>Deadline: ${new Date(task.deadline).toLocaleDateString()}</p>
-                <p>Priority: ${task.priority}</p>
-                <button onclick="updateTaskPriority(${task.id}, '${task.priority}')">Change Priority</button>
-                <button onclick="deleteTask(${task.id})">Delete</button>
-            `;
-            tasksList.appendChild(taskElement);
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+
+    try {
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password }),
         });
+        const data = await response.json();
+        if (response.ok) {
+            token = data.token;
+            localStorage.setItem('token', token);
+            showTaskContainer();
+        } else {
+            showError(data.error);
+        }
+    } catch (error) {
+        showError('Login failed. Please try again.');
     }
+});
 
-    loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
-        try {
-            const response = await fetch(`${API_URL}/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
-            const data = await response.json();
-            if (data.token) {
-                token = data.token;
-                localStorage.setItem('token', token);
-                showTaskContainer();
-            } else {
-                showError(data.error);
-            }
-        } catch (error) {
-            showError('Error logging in');
+// Handle register
+registerForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearError();
+
+    const email = document.getElementById('register-email').value;
+    const password = document.getElementById('register-password').value;
+
+    try {
+        const response = await fetch('/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password }),
+        });
+        const data = await response.json();
+        if (response.ok) {
+            showError('Registration successful. Please log in.');
+        } else {
+            showError(data.error);
         }
-    });
+    } catch (error) {
+        showError('Registration failed. Please try again.');
+    }
+});
 
-    registerForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('register-email').value;
-        const password = document.getElementById('register-password').value;
-        try {
-            const response = await fetch(`${API_URL}/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
-            const data = await response.json();
-            if (data.message) {
-                showError('Registration successful. Please log in.');
-            } else {
-                showError(data.error);
-            }
-        } catch (error) {
-            showError('Error registering user');
+// Handle logout
+logoutBtn.addEventListener('click', () => {
+    localStorage.removeItem('token');
+    token = null;
+    showAuthContainer();
+});
+
+// Handle task creation
+createTaskForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearError();
+
+    const title = document.getElementById('task-title').value;
+    const description = document.getElementById('task-description').value;
+    const deadline = document.getElementById('task-deadline').value;
+    const priority = document.getElementById('task-priority').value;
+
+    try {
+        const response = await fetch('/api/tasks', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ title, description, deadline, priority }),
+        });
+        const data = await response.json();
+        if (response.ok) {
+            createTaskForm.reset();
+            fetchTasks();
+        } else {
+            showError(data.error);
         }
-    });
+    } catch (error) {
+        showError('Task creation failed. Please try again.');
+    }
+});
 
-    logoutBtn.addEventListener('click', () => {
-        localStorage.removeItem('token');
-        token = null;
-        showAuthContainer();
-    });
+// Fetch tasks from the API
+async function fetchTasks(query = '', filterPriority = '', filterDueDate = '') {
+    try {
+        let url = `/api/tasks?query=${query}&priority=${filterPriority}&dueDate=${filterDueDate}`;
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        const tasks = await response.json();
+        renderTasks(tasks);
+    } catch (error) {
+        showError('Error fetching tasks');
+    }
+}
 
-    createTaskForm.addEventListener('submit', async (e) => {
+// Render the tasks in the list
+function renderTasks(tasks) {
+    tasksList.innerHTML = '';
+    tasks.forEach(task => {
+        const taskElement = document.createElement('div');
+        taskElement.className = 'task';
+        taskElement.innerHTML = `
+            <h3>${task.title}</h3>
+            <p>${task.description}</p>
+            <p>Deadline: ${new Date(task.deadline).toLocaleDateString()}</p>
+            <p>Priority: ${task.priority}</p>
+            <button onclick="updateTask('${task._id}')" class="btn btn-secondary">Update</button>
+            <button onclick="deleteTask('${task._id}')" class="btn btn-danger">Delete</button>
+        `;
+        tasksList.appendChild(taskElement);
+    });
+}
+
+// Update a task
+async function updateTask(id) {
+    const task = await fetchTask(id);
+    if (!task) return;
+
+    document.getElementById('task-title').value = task.title;
+    document.getElementById('task-description').value = task.description;
+    document.getElementById('task-deadline').value = task.deadline.split('T')[0];
+    document.getElementById('task-priority').value = task.priority;
+
+    const submitButton = createTaskForm.querySelector('button[type="submit"]');
+    submitButton.textContent = 'Update Task';
+
+    createTaskForm.onsubmit = async (e) => {
         e.preventDefault();
+        clearError();
+
         const title = document.getElementById('task-title').value;
         const description = document.getElementById('task-description').value;
         const deadline = document.getElementById('task-deadline').value;
         const priority = document.getElementById('task-priority').value;
-        try {
-            const response = await fetch(`${API_URL}/tasks`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ title, description, deadline, priority })
-            });
-            const newTask = await response.json();
-            fetchTasks();
-            createTaskForm.reset();
-        } catch (error) {
-            showError('Error creating task');
-        }
-    });
 
-    searchBtn.addEventListener('click', async () => {
-        const query = document.getElementById('search-query').value;
         try {
-            const response = await fetch(`${API_URL}/tasks/search?query=${query}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const tasks = await response.json();
-            renderTasks(tasks);
-        } catch (error) {
-            showError('Error searching tasks');
-        }
-    });
-
-    filterBtn.addEventListener('click', async () => {
-        const priority = document.getElementById('filter-priority').value;
-        const dueDate = document.getElementById('filter-due-date').value;
-        try {
-            const response = await fetch(`${API_URL}/tasks/filter?priority=${priority}&dueDate=${dueDate}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            const tasks = await response.json();
-            renderTasks(tasks);
-        } catch (error) {
-            showError('Error filtering tasks');
-        }
-    });
-
-    window.updateTaskPriority = async (id, currentPriority) => {
-        const newPriority = currentPriority === 'low' ? 'medium' : currentPriority === 'medium' ? 'high' : 'low';
-        try {
-            const response = await fetch(`${API_URL}/tasks/${id}`, {
+            const response = await fetch(`/api/tasks/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ priority: newPriority })
+                body: JSON.stringify({ title, description, deadline, priority }),
             });
-            await response.json();
-            fetchTasks();
+            const data = await response.json();
+            if (response.ok) {
+                createTaskForm.reset();
+                submitButton.textContent = 'Create Task';
+                createTaskForm.onsubmit = null;
+                fetchTasks();
+            } else {
+                showError(data.error);
+            }
         } catch (error) {
-            showError('Error updating task priority');
+            showError('Task update failed. Please try again.');
         }
     };
+}
 
-    window.deleteTask = async (id) => {
-        try {
-            await fetch(`${API_URL}/tasks/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            fetchTasks();
-        } catch (error) {
-            showError('Error deleting task');
+// Fetch a task by ID
+async function fetchTask(id) {
+    try {
+        const response = await fetch(`/api/tasks/${id}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        if (response.ok) {
+            return await response.json();
+        } else {
+            const data = await response.json();
+            showError(data.error);
+            return null;
         }
-    };
-
-    if (token) {
-        showTaskContainer();
-    } else {
-        showAuthContainer();
+    } catch (error) {
+        showError('Error fetching task');
+        return null;
     }
+}
+
+// Delete a task
+async function deleteTask(id) {
+    try {
+        const response = await fetch(`/api/tasks/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        if (response.ok) {
+            fetchTasks();
+        } else {
+            const data = await response.json();
+            showError(data.error);
+        }
+    } catch (error) {
+        showError('Error deleting task');
+    }
+}
+
+// Search tasks by keyword
+searchBtn.addEventListener('click', () => {
+    const query = document.getElementById('search-input').value;
+    fetchTasks(query);
 });
+
+// Filter tasks by priority and due date
+filterBtn.addEventListener('click', () => {
+    const priority = document.getElementById('filter-priority').value;
+    const dueDate = document.getElementById('filter-due-date').value;
+    fetchTasks('', priority, dueDate);
+});
+
+// Check if user is already logged in
+if (token) {
+    showTaskContainer();
+} else {
+    showAuthContainer();
+}

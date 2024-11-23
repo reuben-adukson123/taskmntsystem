@@ -7,62 +7,93 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="container">
+        <!-- Authentication Section -->
+        <div id="auth-container" class="auth-container" role="region" aria-labelledby="auth-header">
+            <h1 id="auth-header" class="main-title">Task Manager</h1>
+            <div id="login-section" class="auth-section" aria-labelledby="login-header">
+                <h2 id="login-header">Login</h2>
+                <form id="login-form" class="auth-form" aria-label="Login Form">
+                    <label for="login-email">Email</label>
+                    <input type="email" id="login-email" placeholder="Enter your email" required>
+                    
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" placeholder="Enter your password" required>
+                    
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
+            </div>
 
-    <!-- Auth Container -->
-    <div id="auth-container">
-        <h1>Login</h1>
-        <div id="error-container"></div>
-        <form id="login-form">
-            <input type="email" id="login-email" placeholder="Email" required>
-            <input type="password" id="login-password" placeholder="Password" required>
-            <button type="submit">Login</button>
-        </form>
-        <hr>
-        <h2>Register</h2>
-        <form id="register-form">
-            <input type="email" id="register-email" placeholder="Email" required>
-            <input type="password" id="register-password" placeholder="Password" required>
-            <button type="submit">Register</button>
-        </form>
-    </div>
-
-    <!-- Task Container -->
-    <div id="task-container" style="display: none;">
-        <button id="logout-btn">Logout</button>
-        <h1>Task Manager</h1>
-        
-        <!-- Task creation form -->
-        <form id="create-task-form">
-            <input type="text" id="task-title" placeholder="Task Title" required>
-            <textarea id="task-description" placeholder="Task Description" required></textarea>
-            <input type="date" id="task-deadline" required>
-            <select id="task-priority">
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-            </select>
-            <button type="submit">Create Task</button>
-        </form>
-        
-        <hr>
-        
-        <!-- Search & Filter -->
-        <div>
-            <input type="text" id="search-query" placeholder="Search tasks">
-            <button id="search-btn">Search</button>
-        </div>
-        <div>
-            <select id="filter-priority">
-                <option value="">All Priorities</option>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-            </select>
-            <input type="date" id="filter-due-date">
-            <button id="filter-btn">Filter</button>
+            <div id="register-section" class="auth-section" aria-labelledby="register-header">
+                <h2 id="register-header">Register</h2>
+                <form id="register-form" class="auth-form" aria-label="Registration Form">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" placeholder="Enter your email" required>
+                    
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" placeholder="Enter your password" required>
+                    
+                    <button type="submit" class="btn btn-secondary">Register</button>
+                </form>
+            </div>
         </div>
 
-        <div id="tasks-list"></div>
+        <!-- Task Management Section -->
+        <div id="task-container" class="task-container" style="display: none;" role="region" aria-labelledby="task-header">
+            <header class="task-header">
+                <h1 id="task-header" class="main-title">Task Manager</h1>
+                <button id="logout-btn" class="btn btn-danger">Logout</button>
+            </header>
+
+            <form id="create-task-form" class="task-form" aria-label="Task Creation Form">
+                <label for="task-title">Task Title</label>
+                <input type="text" id="task-title" placeholder="Task Title" required>
+                
+                <label for="task-description">Task Description</label>
+                <textarea id="task-description" placeholder="Task Description" required></textarea>
+                
+                <div class="form-row">
+                    <label for="task-deadline">Deadline</label>
+                    <input type="date" id="task-deadline" required>
+
+                    <label for="task-priority">Priority</label>
+                    <select id="task-priority" aria-label="Task Priority">
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Create Task</button>
+            </form>
+
+            <!-- Search and Filter Section -->
+            <div id="search-filter" class="search-filter" role="search" aria-labelledby="filter-header">
+                <h2 id="filter-header" class="visually-hidden">Search and Filter Tasks</h2>
+                <label for="search-input">Search Tasks</label>
+                <input type="text" id="search-input" placeholder="Search tasks">
+                
+                <button id="search-btn" class="btn btn-secondary">Search</button>
+                
+                <label for="filter-priority">Priority</label>
+                <select id="filter-priority" aria-label="Filter by Priority">
+                    <option value="">All Priorities</option>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                </select>
+                
+                <label for="filter-due-date">Due Date</label>
+                <input type="date" id="filter-due-date">
+                
+                <button id="filter-btn" class="btn btn-secondary">Filter</button>
+            </div>
+
+            <!-- Task List Section -->
+            <div id="tasks-list" class="tasks-list" role="list" aria-label="List of Tasks"></div>
+        </div>
+
+        <!-- Error Container -->
+        <div id="error-container" class="error-container" role="alert" aria-live="assertive"></div>
     </div>
 
     <script src="script.js"></script>
