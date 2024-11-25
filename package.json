@@ -16,7 +16,8 @@
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^6.10.0",
     "mongoose": "^8.8.2",
-    "nodemon": "^2.0.22"
+    "nodemon": "^2.0.22",
+    "pg": "^8.13.1"
   },
   "author": "Adukwu Reuben",
   "license": "ISC"
